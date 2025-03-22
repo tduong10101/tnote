@@ -3,9 +3,9 @@
    "backend": {
    "s3": {
    "bucket": "tduong10101-terraform-state-bucket",
-   "key": "network.tfstate",
+   "key": "infra.tfstate",
    "region": "ap-southeast-2",
-   "workspace_key_prefix": "network"
+   "workspace_key_prefix": "infra"
 }
 }
 }

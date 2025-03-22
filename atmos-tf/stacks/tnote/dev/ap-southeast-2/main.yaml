@@ -1,0 +1,18 @@
+import:
+- tnote/dev/ap-southeast-2/_defaults
+components:
+  terraform:
+    network:
+      backend:
+        s3:
+          key: network.tfstate
+      vars:
+        ipv4_cidr: "192.168.0.0/16"
+    infra:
+      backend:
+        s3:
+          key: infra.tfstate
+      vars:
+        r53_zone_name: "tdinvoke.net"
+        acm_cert_domain:  "tdinvoke.net"
+

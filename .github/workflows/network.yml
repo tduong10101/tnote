@@ -1,71 +1,71 @@
 name: network
 on:
-  push:
-    branches: ["env/*"]
-  pull_request:
-  workflow_dispatch:
-    inputs:
-      terraform_job:
-        type: choice
-        description: terraform
-        options:
-          - plan
-          - deploy
-          - destroy
+    push:
+        branches: ["env/*"]
+    pull_request:
+    workflow_dispatch:
+        inputs:
+            terraform_job:
+                type: choice
+                description: terraform
+                options:
+                    - plan
+                    - deploy
+                    - destroy
 env:
-  BRANCH_NAME: ${{github.base_ref || github.ref_name}}
+    BRANCH_NAME: ${{github.base_ref || github.ref_name}}
 
 permissions:
-  contents: read
-  id-token: write
+    contents: read
+    id-token: write
 
 jobs:
-  terraform:
-    name: "Terraform"
-    runs-on: ubuntu-latest
+    terraform:
+        name: "Terraform"
+        runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        shell: bash
-        working-directory: "./atmos-tf/"
+        defaults:
+            run:
+                shell: bash
+                working-directory: "./atmos-tf/"
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::069363837566:role/github-vpc
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ap-southeast-2
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: arn:aws:iam::${{ vars.AWS_ACC_NUM }}:role/github-vpc
+                  role-session-name: GitHub_to_AWS_via_FederatedOIDC
+                  aws-region: ap-southeast-2
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-      
-      - name: Setup Atmos
-        uses: cloudposse/github-action-setup-atmos@1.0.2
-        with:
-          atmos-version: 1.45.3
-          install-wrapper: false
-      
-      # check if branch is env/*
-      - name: Validate branch
-        run: |
-          if [[ $BRANCH_NAME == "env/"* ]]; then
-            echo "Valid branch. Current branch is: $BRANCH_NAME"
-          else
-            echo "Invalid branch. Branch must be under env/*"
-            exit 1
-          fi
-      - name: Set env
-        run: echo "STACK=${BRANCH_NAME#env/}"  >> $GITHUB_ENV
-      - name: Run terraform plan
-        if: ${{ inputs.terraform_job == 'plan' || (github.event_name != 'push' && github.event_name != 'workflow_dispatch') }}
-        run: atmos terraform plan network -s $STACK
-      - name: Run terraform deploy
-        if: ${{ inputs.terraform_job == 'deploy' || github.event_name == 'push'}}
-        run: atmos terraform deploy network -s $STACK
-      - name: Run terraform destroy
-        if: ${{ inputs.terraform_job == 'destroy'}}
-        run: atmos terraform destroy network -s $STACK -auto-approve
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v2
+
+            - name: Setup Atmos
+              uses: cloudposse/github-action-setup-atmos@1.0.2
+              with:
+                  atmos-version: 1.45.3
+                  install-wrapper: false
+
+            # check if branch is env/*
+            - name: Validate branch
+              run: |
+                  if [[ $BRANCH_NAME == "env/"* ]]; then
+                    echo "Valid branch. Current branch is: $BRANCH_NAME"
+                  else
+                    echo "Invalid branch. Branch must be under env/*"
+                    exit 1
+                  fi
+            - name: Set env
+              run: echo "STACK=${BRANCH_NAME#env/}"  >> $GITHUB_ENV
+            - name: Run terraform plan
+              if: ${{ inputs.terraform_job == 'plan' || (github.event_name != 'push' && github.event_name != 'workflow_dispatch') }}
+              run: atmos terraform plan network -s $STACK
+            - name: Run terraform deploy
+              if: ${{ inputs.terraform_job == 'deploy' || github.event_name == 'push'}}
+              run: atmos terraform deploy network -s $STACK
+            - name: Run terraform destroy
+              if: ${{ inputs.terraform_job == 'destroy'}}
+              run: atmos terraform destroy network -s $STACK -auto-approve

@@ -1,4 +1,8 @@
 import:
 - tnote/_defaults
-vars:
-  stage: prod
+terraform:
+  backend:
+    s3:
+      region: us-east-1
+  vars:
+    stage: prod

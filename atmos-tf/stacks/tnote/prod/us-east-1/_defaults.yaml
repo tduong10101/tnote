@@ -3,3 +3,4 @@ import:
 vars:
   aws_region: us-east-1
   environment: use1
+  namespace: "tnote-prod"

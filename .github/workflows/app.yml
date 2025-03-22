@@ -1,43 +1,42 @@
 name: app
 on:
-  workflow_dispatch:
-  
+    workflow_dispatch:
+
 permissions:
-  contents: read
-  id-token: write   # This is required for requesting the JWT
-  
+    contents: read
+    id-token: write # This is required for requesting the JWT
+
 jobs:
-  build_ecr:
-    name: build_ecr
-    runs-on: ubuntu-latest
-    environment: production
+    build_ecr:
+        name: build_ecr
+        runs-on: ubuntu-latest
+        environment: production
 
-    defaults:
-      run:
-        shell: bash
-        working-directory: "./"
+        defaults:
+            run:
+                shell: bash
+                working-directory: "./"
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::069363837566:role/github-ecr-img-builder
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ap-southeast-2
-          
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Build, tag, and push docker image to Amazon ECR
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: my-ecr-repo
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          docker build -t $REGISTRY/$REPOSITORY:tnote .
-          docker push $REGISTRY/$REPOSITORY:tnote
-    
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  role-to-assume: arn:aws:iam::${{ vars.AWS_ACC_NUM }}:role/github-ecr-img-builder
+                  role-session-name: GitHub_to_AWS_via_FederatedOIDC
+                  aws-region: ap-southeast-2
+
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@v1
+
+            - name: Build, tag, and push docker image to Amazon ECR
+              env:
+                  REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+                  REPOSITORY: my-ecr-repo
+                  IMAGE_TAG: ${{ github.sha }}
+              run: |
+                  docker build -t $REGISTRY/$REPOSITORY:tnote .
+                  docker push $REGISTRY/$REPOSITORY:tnote

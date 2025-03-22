@@ -1,8 +1,7 @@
-vars:
-  tenant: tnote 
+terraform:
+  vars:
+    tenant: tnote 
   backend_type: s3
   backend:
     s3:
       bucket: "tduong10101-terraform-state-bucket"
-      region: "ap-south-east-2"
-      key: "tduong_tnote.tfstate"
