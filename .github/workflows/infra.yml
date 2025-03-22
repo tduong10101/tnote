@@ -13,6 +13,7 @@ on:
 env:
     BRANCH_NAME: ${{github.base_ref || github.ref_name}}
     TF_VAR_db_pass: ${{ secrets.db_pass }}
+    TF_VAR_db_secret: ${{ secrets.db_secret }}
 permissions:
     contents: read
     id-token: write

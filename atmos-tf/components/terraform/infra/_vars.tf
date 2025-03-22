@@ -25,3 +25,7 @@ variable "acm_cert_domain" {
   type        = string
   description = "aws acm certificate domain"
 }
+variable "db_secret" {
+  type        = string
+  sensitive   = true
+}
